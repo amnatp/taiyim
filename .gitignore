@@ -1,0 +1,14 @@
+# Node project ignores for ysc subfolder
+node_modules/
+npm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.env
+
+# build/output
+dist/
+build/
+
+# misc
+server.log

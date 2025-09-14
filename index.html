@@ -13,22 +13,57 @@
   <!-- Tailwind via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    /* Satriwit-inspired theme variables */
+    :root{
+      --sw-primary: #0084ff; /* blue */
+      --sw-accent: #00d084;  /* green */
+      --sw-warn: #fcb900;    /* amber */
+      --sw-danger: #ed4020;  /* red */
+      --sw-muted: #6b7280;   /* slate-500-ish */
+      --sw-bg: #ffffff;
+    }
+    .btn-primary{ background: linear-gradient(180deg,var(--sw-primary),#006edf); color:#fff }
+    .btn-primary:hover{ filter:brightness(0.95) }
+    .btn-accent{ background: linear-gradient(180deg,var(--sw-accent),#00b36a); color:#fff }
+    .chip-theme{ background: linear-gradient(90deg,#f0f9ff,#fff); color:var(--sw-muted); }
+    .tabBtn.active{ box-shadow: 0 6px 18px rgba(0,132,255,0.12); transform:translateY(-2px) }
     /* simple progress bar */
     .bar { height: 12px; border-radius: 999px; background: #e5e7eb; overflow: hidden; }
-    .bar>span { display:block; height:100%; background: #60a5fa; }
+    .bar { height: 12px; border-radius: 999px; background: #e5e7eb; overflow: hidden; }
+    .bar>span { display:block; height:100%; background: #60a5fa; transition: width 300ms ease, background 300ms ease; border-radius:999px; }
+  .bar>span { width: 0%; }
     .chip { font-size:12px; padding:2px 8px; border-radius:999px; }
+  /* refined good-chip to match Satriwit accent and spacing */
+  .chip-good{ background: linear-gradient(90deg,#00c07a,#008f5e); color:#fff; padding:4px 10px; font-size:12px; border-radius:999px; display:inline-block }
+    /* header tweaks */
+    header .logo { font-size:14px }
+    header nav .tabBtn { font-size:13px }
+    .no-scrollbar::-webkit-scrollbar{ display:none }
+    @media (max-width:640px){
+      header .logo { font-size:13px }
+      header nav { gap:6px }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
-  <header class="p-4 bg-white shadow-sm sticky top-0 z-10">
-    <div class="max-w-4xl mx-auto flex items-center justify-between">
-      <h1 class="text-lg font-semibold">🍎 CKD Kids – โภชนาการโรคไต</h1>
-      <nav class="flex gap-2 text-sm">
-        <button class="tabBtn px-3 py-1 rounded hover:bg-slate-100" data-tab="dashboard">Dashboard</button>
-        <button class="tabBtn px-3 py-1 rounded hover:bg-slate-100" data-tab="food">เลือกอาหาร</button>
-        <button class="tabBtn px-3 py-1 rounded hover:bg-slate-100" data-tab="manage">จัดการอาหาร</button>
-        <button class="tabBtn px-3 py-1 rounded hover:bg-slate-100" data-tab="profile">โปรไฟล์</button>
-  <button id="installBtn" class="ml-2 px-3 py-1 rounded bg-emerald-600 text-white text-sm hidden">ติดตั้งแอป</button>
+  <header class="bg-white shadow-sm sticky top-0 z-10">
+    <div class="max-w-4xl mx-auto flex items-center justify-between p-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 flex items-center justify-center bg-gradient-to-br from-sky-500 to-emerald-400 text-white rounded-md shadow">🍎</div>
+        <div>
+          <div class="text-base font-semibold">CKD Kids</div>
+          <div class="text-xs text-slate-500">โภชนาการโรคไต</div>
+        </div>
+      </div>
+      <nav class="flex items-center gap-2 text-sm">
+        <div id="navItems" class="flex gap-2 overflow-x-auto no-scrollbar">
+          <button class="tabBtn active px-3 py-1 rounded-md bg-gradient-to-b from-rose-50 to-white text-rose-700 hover:from-rose-100 hover:to-white shadow-sm" aria-pressed="true" data-tab="dashboard">ภาพรวม</button>
+          <button class="tabBtn px-3 py-1 rounded-md bg-gradient-to-b from-amber-50 to-white text-amber-700 hover:from-amber-100 hover:to-white shadow-sm" aria-pressed="false" data-tab="food">เลือกอาหาร</button>
+          <button class="tabBtn px-3 py-1 rounded-md bg-gradient-to-b from-sky-50 to-white text-sky-700 hover:from-sky-100 hover:to-white shadow-sm" aria-pressed="false" data-tab="manage">จัดการ</button>
+          <button class="tabBtn px-3 py-1 rounded-md bg-gradient-to-b from-emerald-50 to-white text-emerald-700 hover:from-emerald-100 hover:to-white shadow-sm" aria-pressed="false" data-tab="profile">โปรไฟล์</button>
+          <button class="tabBtn px-3 py-1 rounded-md bg-gradient-to-b from-violet-50 to-white text-violet-700 hover:from-violet-100 hover:to-white shadow-sm" aria-pressed="false" data-tab="confirm">อ่านและยืนยัน</button>
+        </div>
+        <button id="installBtn" class="ml-2 px-3 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm shadow">ติดตั้ง</button>
       </nav>
     </div>
   </header>
@@ -54,13 +89,14 @@
           <div class="space-y-3">
             <div>
               <div class="flex justify-between text-sm mb-1"><span>โปรตีน (g)</span><span id="proteinLabel">0 / 0</span></div>
-              <div class="bar"><span id="proteinBar" style="width:0%"></span></div>
+              <div class="bar"><span id="proteinBar"></span></div>
             </div>
             <div>
               <div class="flex justify-between text-sm mb-1"><span>โซเดียม (mg)</span><span id="sodiumLabel">0 / 0</span></div>
-              <div class="bar"><span id="sodiumBar" style="width:0%"></span></div>
+              <div class="bar"><span id="sodiumBar"></span></div>
             </div>
             <div class="text-sm" id="adviceBox"></div>
+            
           </div>
         </div>
         <div class="bg-white shadow rounded-xl p-4">
@@ -70,6 +106,59 @@
             <button id="clearToday" class="text-xs text-red-600 hover:underline">ลบรายการวันนี้</button>
             <button id="exportCsv" class="text-xs text-slate-700 hover:underline">ส่งออก CSV</button>
           </div>
+          
+        </div>
+      </div>
+    </section>
+
+  <!-- 7-day history (energy panel removed) -->
+    <section id="cal30Block" class="tab">
+      <div class="bg-white shadow rounded-xl p-4">
+        <div class="mt-0">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <h4 id="calHistoryTitle" class="text-sm font-medium mb-0">ประวัติ 7 วันล่าสุด</h4>
+              <button id="exportHistoryBtn" class="ml-3 text-xs px-3 py-1 border rounded bg-white hover:bg-slate-50">ส่งออกประวัติ</button>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="text-xs text-slate-500">ช่วงเวลา</label>
+              <select id="historyRange" class="border rounded px-2 py-1 text-sm" aria-label="ช่วงเวลา ประวัติ" title="ช่วงเวลา ประวัติ">
+                <option value="7" selected>1 สัปดาห์</option>
+                <option value="30">30 วัน</option>
+                <option value="60">60 วัน</option>
+                <option value="90">90 วัน</option>
+                <option value="180">180 วัน</option>
+                <option value="360">360 วัน</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3 bg-white border rounded p-2">
+            <div class="flex items-center gap-2 px-2">
+              <button id="chartTabSodium" class="px-3 py-1 text-sm rounded-md bg-slate-50 active">โซเดียม</button>
+              <button id="chartTabProtein" class="px-3 py-1 text-sm rounded-md bg-white">โปรตีน</button>
+            </div>
+            <div class="p-3">
+              <div id="sodiumChart" class="chartPanel" style="height:140px;"></div>
+              <div id="proteinChart" class="chartPanel hidden" style="height:140px;"></div>
+            </div>
+          </div>
+          <div id="calHistoryTable" class="overflow-auto bg-white border rounded"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Read & Confirm (consent) -->
+    <section id="confirm" class="tab hidden">
+      <div class="bg-white shadow rounded-xl p-4">
+        <h2 class="font-semibold mb-3">อ่านและยืนยัน</h2>
+        <div class="prose text-sm text-slate-700 mb-4">
+          <p>โปรดอ่านข้อความและยืนยันว่าคุณเข้าใจว่าแอปนี้เป็นเพียงต้นแบบเพื่อการศึกษา และไม่ใช่คำแนะนำทางการแพทย์ที่แท้จริง.</p>
+          <p>ข้อมูลส่วนบุคคล (เช่น โปรไฟล์ผู้ป่วย) จะถูกเก็บไว้เฉพาะในอุปกรณ์นี้ หากคุณต้องการลบข้อมูล ให้ใช้ปุ่มรีเซ็ตข้อมูลทั้งหมด.</p>
+          <p>การเพิ่มรายการอาหารใหม่ในหน้าจอ 'จัดการ' จะเป็นเพียงการบันทึกเฉพาะเครื่องนี้ เว้นแต่จะส่งไปยังเซิร์ฟเวอร์และได้รับการยืนยัน.</p>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button id="consentDecline" class="px-3 py-2 rounded-md border">ยกเลิก</button>
+          <button id="consentAccept" class="px-4 py-2 rounded-md bg-violet-600 hover:bg-violet-700 text-white">ยืนยันและต่อไป</button>
         </div>
       </div>
     </section>
@@ -80,7 +169,7 @@
         <h2 class="font-semibold mb-4">เลือก/เพิ่มอาหารในมื้อวันนี้</h2>
         <div class="grid md:grid-cols-4 gap-2 mb-3">
           <input id="search" class="md:col-span-3 border rounded px-3 py-2" placeholder="ค้นหาอาหาร (ชื่อ)" />
-          <select id="categoryFilter" class="border rounded px-3 py-2">
+          <select id="categoryFilter" class="border rounded px-3 py-2" aria-label="กรองหมวดอาหาร" title="กรองหมวดอาหาร">
             <option value="">ทุกหมวด</option>
             <option>อาหารจานหลัก</option>
             <option>อาหารว่าง</option>
@@ -98,7 +187,7 @@
         <h2 class="font-semibold mb-3">เพิ่มรายการอาหารของคุณ</h2>
         <form id="addFoodForm" class="grid md:grid-cols-5 gap-2 items-end">
           <input required id="foodName" class="border rounded px-3 py-2 md:col-span-2" placeholder="ชื่ออาหาร" />
-          <select id="foodCat" class="border rounded px-3 py-2">
+          <select id="foodCat" class="border rounded px-3 py-2" aria-label="หมวดอาหาร" title="หมวดอาหาร">
             <option>อาหารจานหลัก</option>
             <option>อาหารว่าง</option>
             <option>ซอสปรุงรส</option>
@@ -106,52 +195,134 @@
           </select>
           <input required id="foodProtein" type="number" min="0" step="0.1" class="border rounded px-3 py-2" placeholder="โปรตีน/หน่วย (g)" />
           <input required id="foodSodium" type="number" min="0" step="1" class="border rounded px-3 py-2" placeholder="โซเดียม/หน่วย (mg)" />
-          <button class="bg-slate-800 text-white rounded px-4 py-2">เพิ่ม</button>
+          <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white rounded-md px-4 py-2 shadow">เพิ่ม</button>
         </form>
-        <p class="text-xs text-slate-500 mt-2">* หน่วยบริโภค = 1 เสิร์ฟ ตามที่คุณกำหนด</p>
+  <p class="text-xs text-slate-500 mt-2">* หน่วยบริโภค = 1 เสิร์ฟ ตามที่คุณกำหนด</p>
+  <div id="manageList" class="mt-3 space-y-2"></div>
       </div>
     </section>
 
     <!-- Profile -->
     <section id="profile" class="tab hidden">
-      <div class="bg-white shadow rounded-xl p-4">
-        <h2 class="font-semibold mb-3">โปรไฟล์ผู้ป่วย</h2>
-        <form id="profileForm" class="grid sm:grid-cols-2 gap-3">
+      <div class="bg-pink-50 shadow rounded-xl p-4">
+        <h2 class="font-semibold mb-3 text-pink-700">โปรไฟล์ผู้ป่วย</h2>
+        <form id="profileForm" class="grid sm:grid-cols-2 gap-4">
           <div>
-            <label class="text-sm">ชื่อ</label>
-            <input id="p_name" class="border rounded w-full px-3 py-2" />
+            <label class="text-sm text-pink-700" for="p_name">ชื่อ-สกุล</label>
+            <input id="p_name" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80 placeholder-pink-400" placeholder="ชื่อ-สกุล" title="ชื่อ" />
           </div>
           <div>
-            <label class="text-sm">อายุ (ปี)</label>
-            <input id="p_age" type="number" min="0" max="18" class="border rounded w-full px-3 py-2" />
+            <label class="text-sm text-pink-700" for="p_nickname">ชื่อเล่น</label>
+            <input id="p_nickname" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80 placeholder-pink-400" placeholder="ชื่อเล่น (ถ้ามี)" title="ชื่อเล่น" />
           </div>
           <div>
-            <label class="text-sm">น้ำหนัก (กก.)</label>
-            <input id="p_weight" type="number" min="1" step="0.1" class="border rounded w-full px-3 py-2" />
+            <label class="text-sm text-pink-700" for="p_sex">เพศ</label>
+            <select id="p_sex" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" aria-label="เพศ" title="เพศ">
+              <option value="">ไม่ระบุ</option>
+              <option value="male">ชาย</option>
+              <option value="female">หญิง</option>
+            </select>
           </div>
+
+          <div class="sm:col-span-2 grid grid-cols-4 gap-3 items-end">
+            <div>
+              <label class="text-sm text-pink-700">วันเกิด</label>
+              <input id="p_dob" type="date" aria-label="วันเกิด" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" />
+            </div>
+            <div>
+              <label class="text-sm text-pink-700">อายุ (ปี)</label>
+              <input id="p_age" type="number" min="0" max="18" aria-label="อายุ" readonly class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/60 cursor-not-allowed" placeholder="อายุ" title="อายุ" />
+            </div>
+            <div>
+              <label class="text-sm text-pink-700">น้ำหนัก (กก.)</label>
+              <input id="p_weight" type="number" min="1" step="0.1" aria-label="น้ำหนัก" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" placeholder="น้ำหนัก" title="น้ำหนัก" />
+            </div>
+            <div>
+              <label class="text-sm text-pink-700">ส่วนสูง (ซม.)</label>
+              <input id="p_height" type="number" min="0" step="0.1" aria-label="ส่วนสูง" title="ส่วนสูง" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" placeholder="ส่วนสูง" />
+            </div>
+          </div>
+
           <div>
-            <label class="text-sm">ระยะ CKD</label>
-            <select id="p_ckd" class="border rounded w-full px-3 py-2">
+            <label class="text-sm text-pink-700">ระยะ CKD</label>
+            <select id="p_ckd" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" aria-label="ระยะ CKD" title="ระยะ CKD">
               <option value="2">ระยะ 2</option>
               <option value="3">ระยะ 3</option>
               <option value="4">ระยะ 4</option>
               <option value="5">ระยะ 5 / ฟอกไต (5D)</option>
             </select>
           </div>
-          <div class="sm:col-span-2 flex gap-2">
-            <button class="bg-slate-800 text-white rounded px-4 py-2" type="submit">บันทึกโปรไฟล์</button>
-            <button id="resetAll" class="border rounded px-4 py-2" type="button">รีเซ็ตข้อมูลทั้งหมด</button>
+          <div>
+            <label class="text-sm text-pink-700">eGFR (mL/min/1.73m²)</label>
+            <input id="p_egfr" type="number" min="0" step="0.1" aria-label="eGFR" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" placeholder="eGFR" title="eGFR" />
+
+          </div>
+          <div>
+            <label class="text-sm text-pink-700">ครีเอตินีน (mg/dL)</label>
+            <input id="p_scr" type="number" min="0" step="0.01" aria-label="ครีเอตินีน" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" placeholder="ครีเอตินีน (mg/dL)" title="ครีเอตินีน" />
+          </div>
+
+          <!-- age-specific sub-forms -->
+          <div id="pediatricForm" class="sm:col-span-2 space-y-3 hidden">
+            <div>
+              <label class="text-sm text-pink-700">ชื่อผู้ปกครอง</label>
+              <input id="p_guardian" aria-label="ชื่อผู้ปกครอง" title="ชื่อผู้ปกครอง" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" placeholder="ชื่อผู้ปกครอง" />
+            </div>
+            <div>
+              <label class="text-sm text-pink-700">โรงเรียน</label>
+              <input id="p_school" aria-label="โรงเรียน" title="โรงเรียน" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" placeholder="โรงเรียน" />
+            </div>
+          </div>
+
+          <div id="adultForm" class="sm:col-span-2 space-y-3 hidden">
+            <div>
+              <!-- height moved to main profile row for consistency -->
+              <label class="text-sm text-pink-700">หมายเหตุ</label>
+              <div class="text-xs text-pink-600">ส่วนสูงถูกจัดเก็บด้านบนในแถวโปรไฟล์หลัก</div>
+            </div>
+            <div>
+              <label class="text-sm text-pink-700">ระดับกิจกรรม</label>
+              <select id="p_activity" aria-label="ระดับกิจกรรม" title="ระดับกิจกรรม" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80">
+                <option value="low">น้อย</option>
+                <option value="moderate">ปานกลาง</option>
+                <option value="high">สูง</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sm:col-span-2 flex gap-3">
+            <button class="flex-1 bg-pink-600 hover:bg-pink-700 text-white rounded-full px-6 py-3 shadow" type="submit">บันทึกโปรไฟล์</button>
+            <button id="resetAll" class="flex-1 border border-pink-200 hover:bg-pink-50 text-pink-700 rounded-full px-6 py-3" type="button">รีเซ็ตข้อมูลทั้งหมด</button>
           </div>
         </form>
-        <div class="mt-4 text-xs text-slate-500">หมายเหตุ: เป้าหมายรายวันอ้างอิงช่วงค่าโปรตีน (กรัม/กก./วัน) และโซเดียม (มก./วัน) ตามแนวทาง AAP และ Thai DRI แบบย่อ</div>
+        <div class="mt-4 text-xs text-pink-600">หมายเหตุ: เป้าหมายรายวันอ้างอิงช่วงค่าโปรตีน (กรัม/กก./วัน) และโซเดียม (มก./วัน) ตามแนวทาง AAP และ Thai DRI แบบย่อ</div>
       </div>
     </section>
   </main>
 
   <footer class="max-w-4xl mx-auto p-6 text-xs text-slate-500">
     เครื่องมือนี้เป็นต้นแบบเพื่อการศึกษา ไม่ใช่เครื่องมือการแพทย์จริง ควรปรึกษาแพทย์/นักกำหนดอาหารเสมอ
+    <div class="mt-2">
+      <button id="exportAllBtn" class="text-xs px-3 py-1 border rounded bg-white hover:bg-slate-50">ส่งออกข้อมูลทั้งหมด</button>
+    </div>
   </footer>
 
-  <script type="module" src="/js/app.js"></script>
+  <!-- Toast container -->
+  <div id="toastContainer" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Confirm Add Modal (kept inside body) -->
+  <div id="confirmAddModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-4 mx-4">
+      <div class="font-medium mb-2">ยืนยันการเพิ่มอาหาร</div>
+      <div id="confirmAddMsg" class="text-sm text-slate-700 mb-4">กำลังจะเพิ่มอาหาร...</div>
+      <div class="flex gap-2 justify-end">
+        <button id="confirmAddStay" class="px-3 py-1 rounded-md btn-primary text-sm">เลือกอาหารต่อ</button>
+        <button id="confirmAddDashboard" class="px-3 py-1 rounded-md bg-amber-500 text-white text-sm hover:brightness-95">ดูรายการที่เลือก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- dev cache-buster: append ?_t=dev to force-refresh in development; remove for production -->
+  <script type="module" src="/js/app.js?_t=dev"></script>
 </body>
 </html>

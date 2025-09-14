@@ -1,0 +1,16 @@
+{
+  "name": "ysc-tools",
+  "version": "1.0.0",
+  "description": "Dev utilities for CKD Kids ysc app",
+  "main": "tools/check-idb.js",
+  "scripts": {
+    "start": "node server.js",
+    "check-idb": "node tools/check-idb.js"
+  },
+  "dependencies": {
+    "express": "^4.18.4"
+  },
+  "devDependencies": {
+    "puppeteer": "^21.3.0"
+  }
+}
