@@ -185,17 +185,28 @@
     <section id="manage" class="tab hidden">
       <div class="bg-white shadow rounded-xl p-4">
         <h2 class="font-semibold mb-3">เพิ่มรายการอาหารของคุณ</h2>
-        <form id="addFoodForm" class="grid md:grid-cols-5 gap-2 items-end">
-          <input required id="foodName" class="border rounded px-3 py-2 md:col-span-2" placeholder="ชื่ออาหาร" />
-          <select id="foodCat" class="border rounded px-3 py-2" aria-label="หมวดอาหาร" title="หมวดอาหาร">
-            <option>อาหารจานหลัก</option>
-            <option>อาหารว่าง</option>
-            <option>ซอสปรุงรส</option>
-            <option>อื่นๆ</option>
-          </select>
-          <input required id="foodProtein" type="number" min="0" step="0.1" class="border rounded px-3 py-2" placeholder="โปรตีน/หน่วย (g)" />
-          <input required id="foodSodium" type="number" min="0" step="1" class="border rounded px-3 py-2" placeholder="โซเดียม/หน่วย (mg)" />
-          <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white rounded-md px-4 py-2 shadow">เพิ่ม</button>
+        <form id="addFoodForm" class="space-y-3">
+          <div class="grid md:grid-cols-5 gap-2">
+            <input required id="foodName" class="border rounded px-3 py-2 md:col-span-2" placeholder="ชื่ออาหาร" />
+            <select id="foodCat" class="border rounded px-3 py-2 md:col-span-1" aria-label="หมวดอาหาร" title="หมวดอาหาร">
+              <option>อาหารจานหลัก</option>
+              <option>อาหารว่าง</option>
+              <option>ซอสปรุงรส</option>
+              <option>อื่นๆ</option>
+            </select>
+            <input required id="foodProtein" type="number" min="0" step="0.1" class="border rounded px-3 py-2 md:col-span-1" placeholder="โปรตีน/หน่วย (g)" />
+            <input required id="foodSodium" type="number" min="0" step="1" class="border rounded px-3 py-2 md:col-span-1" placeholder="โซเดียม/หน่วย (mg)" />
+          </div>
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-3">
+              <label for="foodImage" class="text-sm text-slate-700">รูปภาพ</label>
+              <input id="foodImage" type="file" accept="image/*" capture="environment" class="border rounded px-2 py-1" />
+              <img id="foodImagePreview" src="images/no-image.jpg" alt="preview" class="w-16 h-16 object-cover rounded-md border hidden" />
+            </div>
+            <div class="ml-auto">
+              <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white rounded-md px-6 py-2 shadow">เพิ่ม</button>
+            </div>
+          </div>
         </form>
   <p class="text-xs text-slate-500 mt-2">* หน่วยบริโภค = 1 เสิร์ฟ ตามที่คุณกำหนด</p>
   <div id="manageList" class="mt-3 space-y-2"></div>

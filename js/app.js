@@ -358,8 +358,13 @@ function registerEvents(){
       protein: Number(document.getElementById('foodProtein').value),
       sodium: Number(document.getElementById('foodSodium').value)
     };
-    // Try to POST to server API; if successful, reload server foods. Otherwise keep local-only.
-    fetch('/api/foods', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(f) })
+    // handle optional image input (read as data URL) and then POST
+    const fileInput = document.getElementById('foodImage');
+    const file = fileInput && fileInput.files && fileInput.files[0];
+    const submitWithImage = (imageDataUrl)=>{
+      if(imageDataUrl) f.image = imageDataUrl;
+      // Try to POST to server API; if successful, reload server foods. Otherwise keep local-only.
+      fetch('/api/foods', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(f) })
       .then(r=> r.ok ? r.json() : Promise.reject(r))
       .then(async json => {
         showToast('เพิ่มอาหารไปยังเซิร์ฟเวอร์แล้ว');
@@ -367,9 +372,27 @@ function registerEvents(){
         renderFoodList();
       }).catch(err => {
   // fallback: local-only (persist managed foods to IDB)
-  f._source = 'local'; foods.push(f); try{ saveManagedFoods(foods); }catch(e){} renderFoodList(); showToast('เพิ่มอาหารในเครื่อง (เซิร์ฟเวอร์ไม่ตอบ)');
+      f._source = 'local'; foods.push(f); try{ saveManagedFoods(foods); }catch(e){} renderFoodList(); showToast('เพิ่มอาหารในเครื่อง (เซิร์ฟเวอร์ไม่ตอบ)');
       }).finally(()=> e.target.reset());
+    };
+    if(file){
+      const reader = new FileReader();
+      reader.onload = ()=> submitWithImage(reader.result);
+      reader.readAsDataURL(file);
+    } else submitWithImage(null);
   });
+
+  // Preview selected image in the add food form
+  const foodImageEl = document.getElementById('foodImage');
+  const foodPreview = document.getElementById('foodImagePreview');
+  if(foodImageEl && foodPreview){
+    foodImageEl.addEventListener('change', (ev)=>{
+      const f = ev.target.files && ev.target.files[0];
+      if(!f){ foodPreview.classList.add('hidden'); return; }
+      const r = new FileReader(); r.onload = ()=>{ foodPreview.src = r.result; foodPreview.classList.remove('hidden'); };
+      r.readAsDataURL(f);
+    });
+  }
 }
 
 // Simple toast helper
