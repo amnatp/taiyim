@@ -267,6 +267,8 @@ export function renderManageFoods(){
   foods.forEach((f, idx)=>{
     const row = document.createElement('div');
     row.className = 'p-2 border rounded flex items-center justify-between gap-2 bg-white';
+    // mark row with data-managed-id so we can target it after adding
+    row.setAttribute('data-managed-id', f.id || `u_${idx}`);
   row.innerHTML = `
       <div class="flex-1 flex items-center gap-3">
         <div class="flex-shrink-0">

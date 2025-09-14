@@ -197,13 +197,13 @@
             <input required id="foodProtein" type="number" min="0" step="0.1" class="border rounded px-3 py-2 md:col-span-1" placeholder="โปรตีน/หน่วย (g)" />
             <input required id="foodSodium" type="number" min="0" step="1" class="border rounded px-3 py-2 md:col-span-1" placeholder="โซเดียม/หน่วย (mg)" />
           </div>
-          <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div class="flex items-center gap-3 flex-wrap">
               <label for="foodImage" class="text-sm text-slate-700">รูปภาพ</label>
-              <input id="foodImage" type="file" accept="image/*" class="border rounded px-2 py-1" />
+              <input id="foodImage" type="file" accept="image/*" class="border rounded px-2 py-1 max-w-full sm:max-w-xs" />
               <img id="foodImagePreview" src="images/no-image.jpg" alt="preview" class="w-16 h-16 object-cover rounded-md border hidden" />
             </div>
-            <div class="ml-auto">
+            <div class="ml-0 sm:ml-auto">
               <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white rounded-md px-6 py-2 shadow">เพิ่ม</button>
             </div>
           </div>

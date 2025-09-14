@@ -430,11 +430,45 @@ function registerEvents(){
       .then(async json => {
         showToast('เพิ่มอาหารไปยังเซิร์ฟเวอร์แล้ว');
         await loadFoodsFromServer();
-        renderFoodList();
+        // refresh both food list and manage list so new item appears immediately
+        try{ renderFoodList(); }catch(e){}
+        try{ renderManageFoods(); }catch(e){}
       }).catch(err => {
   // fallback: local-only (persist managed foods to IDB)
-      f._source = 'local'; foods.push(f); try{ saveManagedFoods(foods); }catch(e){} renderFoodList(); showToast('เพิ่มอาหารในเครื่อง (เซิร์ฟเวอร์ไม่ตอบ)');
-      }).finally(()=> e.target.reset());
+  f._source = 'local'; foods.push(f);
+      try{ saveManagedFoods(foods); }catch(e){}
+      // update both UI lists so the new managed food shows immediately
+  try{ renderManageFoods(); }catch(e){}
+  try{ renderFoodList(); }catch(e){}
+  // scroll to and highlight the newly added managed food
+  try{ scrollToManagedItem && scrollToManagedItem(f.id); }catch(e){}
+      showToast('เพิ่มอาหารในเครื่อง (เซิร์ฟเวอร์ไม่ตอบ)');
+      }).finally(()=>{
+        // reset the form safely
+        try{ if(e && e.target && typeof e.target.reset === 'function') e.target.reset(); }catch(e){}
+        // clear file input and reset/hide preview image robustly
+        try{
+          const fileEl = document.getElementById('foodImage');
+          const preview = document.getElementById('foodImagePreview');
+          if(fileEl){
+            // Replace input with a fresh clone to reliably clear file selection across browsers
+            const clone = fileEl.cloneNode(true);
+            fileEl.parentNode && fileEl.parentNode.replaceChild(clone, fileEl);
+          }
+          if(preview){
+            // aggressively clear preview and hide it so no image remains after submit
+            try{ preview.removeAttribute('srcset'); }catch(e){}
+            try{ preview.style.objectPosition = 'center'; }catch(e){}
+            try{ preview.removeAttribute('src'); }catch(e){}
+            try{ preview.src = ''; }catch(e){}
+            try{ preview.alt = ''; }catch(e){}
+            try{ preview.style.display = 'none'; }catch(e){}
+            preview.classList.add('hidden');
+          }
+          // reattach preview handler to the new input element
+          try{ attachFoodImagePreviewHandler(); }catch(e){}
+        }catch(err){ /* ignore */ }
+      });
     };
     if(file){
       // attempt to resize first to reduce payload
@@ -444,24 +478,60 @@ function registerEvents(){
     } else submitWithImage(null);
   });
 
-  // Preview selected image in the add food form
-  const foodImageEl = document.getElementById('foodImage');
-  const foodPreview = document.getElementById('foodImagePreview');
-  if(foodImageEl && foodPreview){
-    foodImageEl.addEventListener('change', (ev)=>{
+  // Preview selected image in the add food form (attach via helper so we can rebind after replacing input)
+  function attachFoodImagePreviewHandler(){
+    const fileEl = document.getElementById('foodImage');
+    const previewEl = document.getElementById('foodImagePreview');
+    if(!fileEl || !previewEl) return;
+    // use onchange property to avoid duplicate listeners when re-attaching
+    fileEl.onchange = (ev)=>{
       const f = ev.target.files && ev.target.files[0];
-      if(!f){ foodPreview.classList.add('hidden'); return; }
+      if(!f){
+        // hide preview when no file selected
+        previewEl.classList.add('hidden');
+        previewEl.style.display = 'none';
+        previewEl.src = 'images/no-image.jpg';
+        return;
+      }
       try{
-        const pw = foodPreview.clientWidth || 64; const ph = foodPreview.clientHeight || 64;
+        const pw = previewEl.clientWidth || 64; const ph = previewEl.clientHeight || 64;
         resizeImage(f, 400, 400, 0.8, 'cover', pw, ph).then(dataUrl=>{
-          foodPreview.src = dataUrl; foodPreview.classList.remove('hidden');
+          previewEl.src = dataUrl;
+          // undo any aggressive hiding done after submit
+          previewEl.style.display = '';
+          previewEl.classList.remove('hidden');
         }).catch(()=>{
-          const r = new FileReader(); r.onload = ()=>{ foodPreview.src = r.result; foodPreview.classList.remove('hidden'); };
+          const r = new FileReader(); r.onload = ()=>{
+            previewEl.src = r.result;
+            previewEl.style.display = '';
+            previewEl.classList.remove('hidden');
+          };
           r.readAsDataURL(f);
         });
-      }catch(e){ const r = new FileReader(); r.onload = ()=>{ foodPreview.src = r.result; foodPreview.classList.remove('hidden'); }; r.readAsDataURL(f); }
-    });
+      }catch(e){ const r = new FileReader(); r.onload = ()=>{ previewEl.src = r.result; previewEl.style.display = ''; previewEl.classList.remove('hidden'); }; r.readAsDataURL(f); }
+    };
   }
+  // attach initially
+  attachFoodImagePreviewHandler();
+
+  // helper: scroll to and briefly highlight a managed item by id
+  window.scrollToManagedItem = window.scrollToManagedItem || function(managedId){
+    try{
+      const el = document.querySelector(`#manageList [data-managed-id="${managedId}"]`);
+      if(!el) return false;
+      // ensure visible
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // flash highlight
+      const origBg = el.style.backgroundColor;
+      el.style.transition = 'box-shadow 300ms, background-color 300ms';
+      el.style.boxShadow = '0 8px 24px rgba(0,0,0,0.08)';
+      el.style.backgroundColor = '#fffbeb'; // subtle highlight
+      setTimeout(()=>{ try{ el.style.boxShadow = ''; el.style.backgroundColor = origBg || ''; }catch(e){} }, 1600);
+      return true;
+    }catch(e){ return false; }
+  };
+  // expose shorthand for code in this module
+  const scrollToManagedItem = window.scrollToManagedItem;
 }
 
 // Simple toast helper
