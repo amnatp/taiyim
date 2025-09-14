@@ -175,7 +175,7 @@ export function renderFoodList(){
       card.className = 'border rounded-lg p-3 hover:shadow-sm bg-white';
       const jpg = `images/${f.id}.jpg`;
       const png = `images/${f.id}.png`;
-      const noImg = 'images/no-image.svg';
+      const noImg = 'images/no-image.jpg';
       const src = f.image ? f.image : jpg;
   card.innerHTML = `
         <div class="flex gap-3 items-center sm:items-start">
@@ -270,7 +270,7 @@ export function renderManageFoods(){
   row.innerHTML = `
       <div class="flex-1 flex items-center gap-3">
         <div class="flex-shrink-0">
-          <img src="${f.image?f.image:`images/${f.id}.jpg`}" alt="${f.name}" class="w-12 h-12 object-cover rounded-md border" onerror="this.onerror=null;this.src='images/${f.id}.png';this.onerror=function(){this.src='images/no-image.svg';}" />
+          <img src="${f.image?f.image:`images/${f.id}.jpg`}" alt="${f.name}" class="w-12 h-12 object-cover rounded-md border" onerror="this.onerror=null;this.src='images/${f.id}.png';this.onerror=function(){this.src='images/no-image.jpg';}" />
         </div>
         <div>
           <div class="font-medium text-sm">${f.name} <span class="text-xs text-slate-500">· ${f.cat}</span></div>

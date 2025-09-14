@@ -80,6 +80,60 @@ function registerEvents(){
       return true;
     }catch(e){ console.warn('showTab error', e); return false; }
   }
+  // Resize an image file to a data URL using canvas. Returns a Promise<string|null>.
+  // Resize an image file to a data URL. Modes:
+  // - 'contain' (default) scales the image to fit within maxW x maxH preserving aspect ratio.
+  // - 'cover' crops+scales to exactly fill targetW x targetH (center-crop), useful for square placeholders.
+  function resizeImage(file, maxW=800, maxH=800, quality=0.8, mode='contain', targetW, targetH){
+    return new Promise((resolve, reject)=>{
+      if(!file) return resolve(null);
+      const reader = new FileReader();
+      reader.onerror = (e)=> reject(e);
+      reader.onload = ()=>{
+        const img = new Image();
+        img.onerror = (err)=> reject(err);
+        img.onload = ()=>{
+          try{
+            const iw = img.naturalWidth || img.width;
+            const ih = img.naturalHeight || img.height;
+            if(mode === 'cover' && targetW && targetH){
+              // scale to cover and center-crop to targetW/targetH
+              const scale = Math.max(targetW / iw, targetH / ih);
+              const sw = Math.round(targetW / scale);
+              const sh = Math.round(targetH / scale);
+              // source offset to center crop
+              const sx = Math.round((iw - sw) / 2);
+              const sy = Math.round((ih - sh) / 2);
+              const canvas = document.createElement('canvas');
+              canvas.width = targetW; canvas.height = targetH;
+              const ctx = canvas.getContext('2d');
+              ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+              ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetW, targetH);
+              const outType = /png/i.test(file.type) ? 'image/png' : 'image/jpeg';
+              const dataUrl = outType === 'image/png' ? canvas.toDataURL(outType) : canvas.toDataURL(outType, quality);
+              return resolve(dataUrl);
+            }
+            // default: contain into maxW/maxH
+            const ratio = Math.min(maxW / iw, maxH / ih, 1);
+            const w = Math.round(iw * ratio);
+            const h = Math.round(ih * ratio);
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, w, h);
+            const outType = /png/i.test(file.type) ? 'image/png' : 'image/jpeg';
+            const dataUrl = outType === 'image/png' ? canvas.toDataURL(outType) : canvas.toDataURL(outType, quality);
+            resolve(dataUrl);
+          }catch(err){ reject(err); }
+        };
+        img.src = String(reader.result);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   document.querySelectorAll('.tabBtn').forEach(btn=>btn.addEventListener('click', (ev)=>{
   const el = ev.currentTarget || btn;
   console.debug('[tabBtn] click detected', { tag: el.tagName, dataset: el.dataset, text: el.textContent && el.textContent.trim().slice(0,30) });
@@ -276,9 +330,9 @@ function registerEvents(){
       document.body.appendChild(holder);
       const inputFileHandler = (file, previewEl, cb)=>{
         if(!file) return cb(null);
-        const reader = new FileReader();
-        reader.onload = ()=> cb(reader.result);
-        reader.readAsDataURL(file);
+        resizeImage(file, 800, 800, 0.8).then(dataUrl=> cb(dataUrl)).catch(()=>{
+          const reader = new FileReader(); reader.onload = ()=> cb(reader.result); reader.readAsDataURL(file);
+        });
       };
       const m_image = document.getElementById('m_image');
       const m_preview = document.getElementById('m_preview');
@@ -298,7 +352,13 @@ function registerEvents(){
       m_image.addEventListener('change', (ev)=>{
         const ffile = ev.target.files && ev.target.files[0];
         if(!ffile) return;
-        const r = new FileReader(); r.onload = ()=> { m_preview.src = r.result; }; r.readAsDataURL(ffile);
+        // produce a cover-cropped preview matching the preview element size
+        try{
+          const pw = m_preview.clientWidth || 96; const ph = m_preview.clientHeight || 96;
+          resizeImage(ffile, 800, 800, 0.8, 'cover', pw, ph).then(src=> { m_preview.src = src; }).catch(()=>{
+            const r = new FileReader(); r.onload = ()=> { m_preview.src = r.result; }; r.readAsDataURL(ffile);
+          });
+        }catch(e){ const r = new FileReader(); r.onload = ()=> { m_preview.src = r.result; }; r.readAsDataURL(ffile); }
       });
       document.getElementById('m_cancel').addEventListener('click', ()=> holder.remove());
       document.getElementById('m_save').addEventListener('click', ()=>{
@@ -377,9 +437,10 @@ function registerEvents(){
       }).finally(()=> e.target.reset());
     };
     if(file){
-      const reader = new FileReader();
-      reader.onload = ()=> submitWithImage(reader.result);
-      reader.readAsDataURL(file);
+      // attempt to resize first to reduce payload
+      resizeImage(file, 1024, 1024, 0.8).then(dataUrl=> submitWithImage(dataUrl)).catch(()=>{
+        const reader = new FileReader(); reader.onload = ()=> submitWithImage(reader.result); reader.readAsDataURL(file);
+      });
     } else submitWithImage(null);
   });
 
@@ -390,8 +451,15 @@ function registerEvents(){
     foodImageEl.addEventListener('change', (ev)=>{
       const f = ev.target.files && ev.target.files[0];
       if(!f){ foodPreview.classList.add('hidden'); return; }
-      const r = new FileReader(); r.onload = ()=>{ foodPreview.src = r.result; foodPreview.classList.remove('hidden'); };
-      r.readAsDataURL(f);
+      try{
+        const pw = foodPreview.clientWidth || 64; const ph = foodPreview.clientHeight || 64;
+        resizeImage(f, 400, 400, 0.8, 'cover', pw, ph).then(dataUrl=>{
+          foodPreview.src = dataUrl; foodPreview.classList.remove('hidden');
+        }).catch(()=>{
+          const r = new FileReader(); r.onload = ()=>{ foodPreview.src = r.result; foodPreview.classList.remove('hidden'); };
+          r.readAsDataURL(f);
+        });
+      }catch(e){ const r = new FileReader(); r.onload = ()=>{ foodPreview.src = r.result; foodPreview.classList.remove('hidden'); }; r.readAsDataURL(f); }
     });
   }
 }

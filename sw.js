@@ -49,7 +49,7 @@ self.addEventListener('fetch', (e) => {
             caches.open(CACHE).then(c => c.put(e.request, r.clone()));
           }
           return r;
-        }).catch(()=> caches.match('/images/no-image.svg'));
+        }).catch(()=> caches.match('/images/no-image.jpg'));
       })
     );
   }
