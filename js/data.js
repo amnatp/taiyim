@@ -346,7 +346,7 @@ export async function initDBAndLoad(){
 // Fetch food list from server-provided JSON file
 export async function loadFoodsFromServer(){
   try{
-  const res = await fetch('./food-db.json', { cache: 'no-cache' });
+  const res = await fetch('/taiyim/food-db.json', { cache: 'no-cache' });
     if(!res.ok) throw new Error('fetch failed');
     const j = await res.json();
   if(Array.isArray(j)) foods = j.map(it => ({...it, _source:'server'}));
