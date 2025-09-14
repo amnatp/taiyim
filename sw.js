@@ -7,11 +7,11 @@ const ASSETS = [
   'js/app.js',
   'js/ui.js',
   'js/data.js',
-  '/images/icon-192.png',
-  '/images/icon-512.png',
-  '/images/no-image.svg',
-  '/images/no-image.jpg',
-  '/images/rice.jpg'
+  'images/icon-192.png',
+  'images/icon-512.png',
+  'images/no-image.svg',
+  'images/no-image.jpg',
+  'images/rice.jpg'
 ];
 
 self.addEventListener('install', (e) => {
@@ -49,7 +49,7 @@ self.addEventListener('fetch', (e) => {
             caches.open(CACHE).then(c => c.put(e.request, r.clone()));
           }
           return r;
-        }).catch(()=> caches.match('/images/no-image.jpg'));
+  }).catch(()=> caches.match('images/no-image.jpg'));
       })
     );
   }

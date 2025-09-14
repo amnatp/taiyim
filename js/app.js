@@ -485,6 +485,35 @@ function registerServiceWorker(){
         const reg = await navigator.serviceWorker.register(swUrl);
         console.log('SW registered', reg.scope);
 
+        // Helper: show a non-blocking toast that lets the user Update (skipWaiting) or Dismiss
+        const showUpdateToast = (r) => {
+          try{
+            const container = document.getElementById('toastContainer');
+            // fallback to confirm if no toast container found
+            if(!container){ try{ const wants = confirm('มีเวอร์ชันใหม่ของแอป — โหลดหน้าใหม่เพื่ออัปเดตเป็นเวอร์ชันล่าสุด?'); if(wants) r.waiting?.postMessage({ type: 'SKIP_WAITING' }); }catch(e){} return; }
+
+            const el = document.createElement('div');
+            el.className = 'flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-900 px-4 py-2 rounded-md shadow pointer-events-auto max-w-xl mx-auto';
+            el.innerHTML = `
+              <div class="flex-1 text-sm">มีเวอร์ชันใหม่ของแอป พร้อมอัปเดต</div>
+              <div class="flex gap-2">
+                <button class="updateBtn px-3 py-1 rounded bg-amber-600 text-white text-sm">อัปเดต</button>
+                <button class="dismissBtn px-3 py-1 rounded border text-sm">ปิด</button>
+              </div>`;
+            // ensure interactive toasts can receive pointer events
+            container.appendChild(el);
+            const updateBtn = el.querySelector('.updateBtn');
+            const dismissBtn = el.querySelector('.dismissBtn');
+            const remove = ()=>{ try{ el.remove(); }catch(e){} };
+            dismissBtn?.addEventListener('click', remove);
+            updateBtn?.addEventListener('click', ()=>{
+              try{ showToast('กำลังอัปเดต...'); r.waiting?.postMessage({ type: 'SKIP_WAITING' }); }catch(e){ console.warn('postMessage SKIP_WAITING failed', e); }
+              // remove the toast after a short delay; controllerchange will reload the page
+              setTimeout(remove, 4000);
+            });
+          }catch(e){ console.warn('showUpdateToast failed', e); }
+        };
+
         // Listen for updates found (new SW installing)
         reg.addEventListener('updatefound', () => {
           const installing = reg.installing;
@@ -493,10 +522,8 @@ function registerServiceWorker(){
             if(installing.state === 'installed'){
               // If there's an active controller, this means a new SW is waiting to activate
               if(navigator.serviceWorker.controller){
-                // notify user and request skipWaiting on the waiting worker
-                try{ showToast('มีเวอร์ชันใหม่ — โหลดหน้าใหม่เพื่ออัปเดต', 5000); }catch(e){}
-                // give user a moment, then ask SW to skipWaiting so it can activate
-                setTimeout(()=>{ try{ reg.waiting?.postMessage({ type: 'SKIP_WAITING' }); }catch(e){} }, 1000);
+                // show toast to let user update
+                showUpdateToast(reg);
               } else {
                 console.log('Service worker installed for the first time (cached).');
               }
@@ -504,10 +531,9 @@ function registerServiceWorker(){
           });
         });
 
-        // If a worker is already waiting when the page loads, activate it
+        // If a worker is already waiting when the page loads, show update toast
         if(reg.waiting){
-          try{ showToast('มีเวอร์ชันใหม่อยู่ในคิว — โหลดหน้าใหม่', 5000); }catch(e){}
-          try{ reg.waiting.postMessage({ type: 'SKIP_WAITING' }); }catch(e){}
+          showUpdateToast(reg);
         }
 
         // When a new SW takes control, reload so the page runs under the new version
@@ -516,7 +542,12 @@ function registerServiceWorker(){
           try{ window.location.reload(); }catch(e){}
         });
 
-      }catch(err){ console.log('SW reg failed', err); }
+        // Force an update check at registration time so user sees new version quickly
+        try{ reg.update(); }catch(e){ /* ignore */ }
+        // Periodically check for updates (hourly)
+        try{ setInterval(()=>{ reg.update().catch(()=>{}); }, 1000*60*60); }catch(e){}
+
+  }catch(err){ console.log('SW reg failed', err); }
     });
   }
 }
