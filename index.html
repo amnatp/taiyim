@@ -215,8 +215,8 @@
 
     <!-- Profile -->
     <section id="profile" class="tab hidden">
-      <div class="bg-pink-50 shadow rounded-xl p-4">
-        <h2 class="font-semibold mb-3 text-pink-700">โปรไฟล์ผู้ป่วย</h2>
+      <div class="bg-white shadow rounded-xl p-4">
+        <h2 class="font-semibold mb-3 text-slate-800">โปรไฟล์ผู้ป่วย</h2>
         <!-- top block: consent only (visible first) -->
         <div id="consentBox" class="mb-4 bg-white border rounded p-3">
           <div class="font-medium mb-1">อ่านและยืนยัน</div>
@@ -224,7 +224,7 @@
           <div class="flex justify-between items-center">
             <div id="consentButtonsProfile" class="flex justify-end gap-2">
               <button id="consentDecline" class="px-3 py-1 rounded-md border">ยกเลิก</button>
-              <button id="consentAccept" class="px-4 py-1 rounded-md bg-violet-600 hover:bg-violet-700 text-white">ยืนยันและต่อไป</button>
+              <button id="consentAccept" class="px-4 py-1 rounded-md bg-slate-800 hover:bg-slate-900 text-white">ยืนยันและต่อไป</button>
             </div>
             <button id="consentRevokeProfile" class="ml-2 px-3 py-1 text-sm text-red-600 border rounded hidden">ถอนการยินยอม</button>
           </div>
@@ -237,44 +237,48 @@
         <div id="profileBlock" class="hidden">
           <form id="profileForm" class="grid sm:grid-cols-2 gap-4">
           <div>
-            <label class="text-sm text-pink-700" for="p_name">ชื่อ-สกุล</label>
-            <input id="p_name" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80 placeholder-pink-400" placeholder="ชื่อ-สกุล" title="ชื่อ" />
+            <label class="text-sm text-slate-700" for="p_name">ชื่อ-สกุล</label>
+            <input id="p_name" class="w-full px-3 py-2 border rounded-md" placeholder="ชื่อ-สกุล" title="ชื่อ" />
           </div>
           <div>
-            <label class="text-sm text-pink-700" for="p_nickname">ชื่อเล่น</label>
-            <input id="p_nickname" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80 placeholder-pink-400" placeholder="ชื่อเล่น (ถ้ามี)" title="ชื่อเล่น" />
+            <label class="text-sm text-slate-700" for="p_nickname">ชื่อเล่น</label>
+            <input id="p_nickname" class="w-full px-3 py-2 border rounded-md" placeholder="ชื่อเล่น (ถ้ามี)" title="ชื่อเล่น" />
           </div>
           <div>
-            <label class="text-sm text-pink-700" for="p_sex">เพศ</label>
-            <select id="p_sex" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" aria-label="เพศ" title="เพศ">
+            <label class="text-sm text-slate-700" for="p_sex">เพศ</label>
+            <select id="p_sex" class="w-full px-3 py-2 border rounded-md" aria-label="เพศ" title="เพศ">
               <option value="">ไม่ระบุ</option>
               <option value="male">ชาย</option>
               <option value="female">หญิง</option>
             </select>
           </div>
 
-          <div class="sm:col-span-2 grid grid-cols-4 gap-3 items-end">
-            <div>
-              <label class="text-sm text-pink-700">วันเกิด</label>
-              <input id="p_dob" type="date" aria-label="วันเกิด" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" />
+          <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+            <div class="space-y-3">
+              <div>
+                <label class="text-sm text-slate-700">วันเกิด</label>
+                <input id="p_dob" type="date" aria-label="วันเกิด" class="w-full px-3 py-2 border rounded-md" />
+              </div>
+              <div>
+                <label class="text-sm text-slate-700">อายุ (ปี)</label>
+                <input id="p_age" type="number" min="0" max="18" aria-label="อายุ" readonly class="w-full px-3 py-2 border rounded-md bg-slate-50 cursor-not-allowed" placeholder="อายุ" title="อายุ" />
+              </div>
             </div>
-            <div>
-              <label class="text-sm text-pink-700">อายุ (ปี)</label>
-              <input id="p_age" type="number" min="0" max="18" aria-label="อายุ" readonly class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/60 cursor-not-allowed" placeholder="อายุ" title="อายุ" />
-            </div>
-            <div>
-              <label class="text-sm text-pink-700">น้ำหนัก (กก.)</label>
-              <input id="p_weight" type="number" min="1" step="0.1" aria-label="น้ำหนัก" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" placeholder="น้ำหนัก" title="น้ำหนัก" />
-            </div>
-            <div>
-              <label class="text-sm text-pink-700">ส่วนสูง (ซม.)</label>
-              <input id="p_height" type="number" min="0" step="0.1" aria-label="ส่วนสูง" title="ส่วนสูง" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" placeholder="ส่วนสูง" />
+            <div class="space-y-3">
+              <div>
+                <label class="text-sm text-slate-700">น้ำหนัก (กก.)</label>
+                <input id="p_weight" type="number" min="1" step="0.1" aria-label="น้ำหนัก" class="w-full px-3 py-2 border rounded-md" placeholder="น้ำหนัก" title="น้ำหนัก" />
+              </div>
+              <div>
+                <label class="text-sm text-slate-700">ส่วนสูง (ซม.)</label>
+                <input id="p_height" type="number" min="0" step="0.1" aria-label="ส่วนสูง" title="ส่วนสูง" class="w-full px-3 py-2 border rounded-md" placeholder="ส่วนสูง" />
+              </div>
             </div>
           </div>
 
           <div>
-            <label class="text-sm text-pink-700">ระยะ CKD</label>
-            <select id="p_ckd" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" aria-label="ระยะ CKD" title="ระยะ CKD">
+            <label class="text-sm text-slate-700">ระยะ CKD</label>
+            <select id="p_ckd" class="w-full px-3 py-2 border rounded-md" aria-label="ระยะ CKD" title="ระยะ CKD">
               <option value="2">ระยะ 2</option>
               <option value="3">ระยะ 3</option>
               <option value="4">ระยะ 4</option>
@@ -282,36 +286,36 @@
             </select>
           </div>
           <div>
-            <label class="text-sm text-pink-700">eGFR (mL/min/1.73m²)</label>
-            <input id="p_egfr" type="number" min="0" step="0.1" aria-label="eGFR" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" placeholder="eGFR" title="eGFR" />
+            <label class="text-sm text-slate-700">eGFR (mL/min/1.73m²)</label>
+            <input id="p_egfr" type="number" min="0" step="0.1" aria-label="eGFR" class="w-full px-3 py-2 border rounded-md" placeholder="eGFR" title="eGFR" />
 
           </div>
           <div>
-            <label class="text-sm text-pink-700">ครีเอตินีน (mg/dL)</label>
-            <input id="p_scr" type="number" min="0" step="0.01" aria-label="ครีเอตินีน" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" placeholder="ครีเอตินีน (mg/dL)" title="ครีเอตินีน" />
+            <label class="text-sm text-slate-700">ครีเอตินีน (mg/dL)</label>
+            <input id="p_scr" type="number" min="0" step="0.01" aria-label="ครีเอตินีน" class="w-full px-3 py-2 border rounded-md" placeholder="ครีเอตินีน (mg/dL)" title="ครีเอตินีน" />
           </div>
 
           <!-- age-specific sub-forms -->
           <div id="pediatricForm" class="sm:col-span-2 space-y-3 hidden">
             <div>
-              <label class="text-sm text-pink-700">ชื่อผู้ปกครอง</label>
-              <input id="p_guardian" aria-label="ชื่อผู้ปกครอง" title="ชื่อผู้ปกครอง" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" placeholder="ชื่อผู้ปกครอง" />
+              <label class="text-sm text-slate-700">ชื่อผู้ปกครอง</label>
+              <input id="p_guardian" aria-label="ชื่อผู้ปกครอง" title="ชื่อผู้ปกครอง" class="w-full px-3 py-2 border rounded-md" placeholder="ชื่อผู้ปกครอง" />
             </div>
             <div>
-              <label class="text-sm text-pink-700">โรงเรียน</label>
-              <input id="p_school" aria-label="โรงเรียน" title="โรงเรียน" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80" placeholder="โรงเรียน" />
+              <label class="text-sm text-slate-700">โรงเรียน</label>
+              <input id="p_school" aria-label="โรงเรียน" title="โรงเรียน" class="w-full px-3 py-2 border rounded-md" placeholder="โรงเรียน" />
             </div>
           </div>
 
           <div id="adultForm" class="sm:col-span-2 space-y-3 hidden">
             <div>
               <!-- height moved to main profile row for consistency -->
-              <label class="text-sm text-pink-700">หมายเหตุ</label>
-              <div class="text-xs text-pink-600">ส่วนสูงถูกจัดเก็บด้านบนในแถวโปรไฟล์หลัก</div>
+              <label class="text-sm text-slate-700">หมายเหตุ</label>
+              <div class="text-xs text-slate-600">ส่วนสูงถูกจัดเก็บด้านบนในแถวโปรไฟล์หลัก</div>
             </div>
             <div>
-              <label class="text-sm text-pink-700">ระดับกิจกรรม</label>
-              <select id="p_activity" aria-label="ระดับกิจกรรม" title="ระดับกิจกรรม" class="w-full px-4 py-3 rounded-full border border-pink-200 bg-white/80">
+              <label class="text-sm text-slate-700">ระดับกิจกรรม</label>
+              <select id="p_activity" aria-label="ระดับกิจกรรม" title="ระดับกิจกรรม" class="w-full px-3 py-2 border rounded-md">
                 <option value="low">น้อย</option>
                 <option value="moderate">ปานกลาง</option>
                 <option value="high">สูง</option>
@@ -320,11 +324,11 @@
           </div>
 
           <div class="sm:col-span-2 flex gap-3">
-            <button class="flex-1 bg-pink-600 hover:bg-pink-700 text-white rounded-full px-6 py-3 shadow" type="submit">บันทึกโปรไฟล์</button>
-            <button id="resetAll" class="flex-1 border border-pink-200 hover:bg-pink-50 text-pink-700 rounded-full px-6 py-3" type="button">รีเซ็ตข้อมูลทั้งหมด</button>
+            <button class="flex-1 bg-slate-800 hover:bg-slate-900 text-white rounded-md px-4 py-2 shadow" type="submit">บันทึกโปรไฟล์</button>
+            <button id="resetAll" class="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-md px-4 py-2" type="button">รีเซ็ตข้อมูลทั้งหมด</button>
           </div>
           </form>
-          <div class="mt-4 text-xs text-pink-600">หมายเหตุ: เป้าหมายรายวันอ้างอิงช่วงค่าโปรตีน (กรัม/กก./วัน) และโซเดียม (มก./วัน) ตามแนวทาง AAP และ Thai DRI แบบย่อ</div>
+          <div class="mt-4 text-xs text-slate-600">หมายเหตุ: เป้าหมายรายวันอ้างอิงช่วงค่าโปรตีน (กรัม/กก./วัน) และโซเดียม (มก./วัน) ตามแนวทาง AAP และ Thai DRI แบบย่อ</div>
         </div>
       </div>
     </section>
