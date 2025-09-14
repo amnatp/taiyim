@@ -262,6 +262,9 @@ function registerEvents(){
             <input id=\"m_sodium\" type=\"number\" class=\"border rounded px-3 py-2\" value=\"${f.sodium}\" />
             <label class=\"text-xs text-slate-600\">รูปภาพ (แตะเพื่อถ่าย/เลือกรูป)</label>
             <div class=\"flex items-center gap-2\">
+              <input id=\"m_image\" type=\"file\" accept=\"image/*\" class=\"border rounded px-2 py-1\" />
+              <div class=\"relative\"><img id=\"m_preview\" src=\"${f.image?f.image:`images/${f.id}.jpg`}\" alt=\"preview\" class=\"w-24 h-24 object-cover rounded-md border\" style=\"object-position: ${f.imagePos?`${f.imagePos.x}% ${f.imagePos.y}%`:'center'}\" /></div>
+            </div>
               <input id=\"m_image\" type=\"file\" accept=\"image/*\" capture=\"environment\" class=\"border rounded px-2 py-1\" />
               <div class=\"relative\"><img id=\"m_preview\" src=\"${f.image?f.image:`images/${f.id}.jpg`}\" alt=\"preview\" class=\"w-24 h-24 object-cover rounded-md border\" style=\"object-position: ${f.imagePos?`${f.imagePos.x}% ${f.imagePos.y}%`:'center'}\" /></div>
             </div>
