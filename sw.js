@@ -4,9 +4,9 @@ const ASSETS = [
   '.',
   'index.html',
   'manifest.json',
-  '/js/app.js',
-  '/js/ui.js',
-  '/js/data.js',
+  'js/app.js',
+  'js/ui.js',
+  'js/data.js',
   '/images/icon-192.png',
   '/images/icon-512.png',
   '/images/no-image.svg',
@@ -26,6 +26,13 @@ self.addEventListener('activate', (e) => {
       names.map(n => { if (n !== CACHE) return caches.delete(n); return null; })
     )).then(() => self.clients.claim())
   );
+});
+
+// Support skipWaiting via postMessage from the page
+self.addEventListener('message', (event) => {
+  if(event.data && event.data.type === 'SKIP_WAITING'){
+    self.skipWaiting();
+  }
 });
 
 // Simple cache-first for known assets, network fallback otherwise

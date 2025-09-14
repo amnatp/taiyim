@@ -386,10 +386,45 @@ function showToast(text, ms=2500){
 
 function registerServiceWorker(){
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js').then(function(reg){
+    // register relative to the current document so scope matches (works on GitHub Pages subpaths)
+    const swUrl = './sw.js';
+    window.addEventListener('load', async function() {
+      try{
+        const reg = await navigator.serviceWorker.register(swUrl);
         console.log('SW registered', reg.scope);
-      }).catch(function(err){ console.log('SW reg failed', err); });
+
+        // Listen for updates found (new SW installing)
+        reg.addEventListener('updatefound', () => {
+          const installing = reg.installing;
+          if(!installing) return;
+          installing.addEventListener('statechange', () => {
+            if(installing.state === 'installed'){
+              // If there's an active controller, this means a new SW is waiting to activate
+              if(navigator.serviceWorker.controller){
+                // notify user and request skipWaiting on the waiting worker
+                try{ showToast('มีเวอร์ชันใหม่ — โหลดหน้าใหม่เพื่ออัปเดต', 5000); }catch(e){}
+                // give user a moment, then ask SW to skipWaiting so it can activate
+                setTimeout(()=>{ try{ reg.waiting?.postMessage({ type: 'SKIP_WAITING' }); }catch(e){} }, 1000);
+              } else {
+                console.log('Service worker installed for the first time (cached).');
+              }
+            }
+          });
+        });
+
+        // If a worker is already waiting when the page loads, activate it
+        if(reg.waiting){
+          try{ showToast('มีเวอร์ชันใหม่อยู่ในคิว — โหลดหน้าใหม่', 5000); }catch(e){}
+          try{ reg.waiting.postMessage({ type: 'SKIP_WAITING' }); }catch(e){}
+        }
+
+        // When a new SW takes control, reload so the page runs under the new version
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          console.log('New service worker activated, reloading page...');
+          try{ window.location.reload(); }catch(e){}
+        });
+
+      }catch(err){ console.log('SW reg failed', err); }
     });
   }
 }
