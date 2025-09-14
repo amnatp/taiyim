@@ -15,8 +15,9 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (e) => {
+  // Populate cache, but do NOT self.skipWaiting() here.
+  // Allow the new worker to enter 'waiting' so the page can request activation
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
