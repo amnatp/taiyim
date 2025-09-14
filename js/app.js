@@ -483,8 +483,11 @@ export async function boot(){
     const profileBlock = document.getElementById('profileBlock');
     const consentBoxEl = document.getElementById('consentBox');
     if(profileBlock && consentBoxEl){
-      if(!!consent){ profileBlock.classList.remove('hidden'); consentBoxEl.classList.add('hidden'); }
-      else { profileBlock.classList.add('hidden'); consentBoxEl.classList.remove('hidden'); }
+  // always show consentBox content; toggle buttons vs status
+  const cbProf = document.getElementById('consentButtonsProfile');
+  const csProf = document.getElementById('consentStatusProfile');
+  if(!!consent){ profileBlock.classList.remove('hidden'); if(cbProf) cbProf.classList.add('hidden'); if(csProf) csProf.classList.remove('hidden'); }
+  else { profileBlock.classList.add('hidden'); if(cbProf) cbProf.classList.remove('hidden'); if(csProf) csProf.classList.add('hidden'); }
     }
   }catch(e){ /* ignore */ }
 
@@ -493,19 +496,39 @@ export async function boot(){
   const declineButtons = ['consentDecline','consentDeclineGlobal'];
   acceptButtons.forEach(id=> document.getElementById(id)?.addEventListener('click', ()=>{
     LS.save('consent', true);
-    // navigate to dashboard
-    document.querySelectorAll('.tab').forEach(s=>s.classList.add('hidden'));
-    const db = document.getElementById('dashboard'); if(db) db.classList.remove('hidden');
-    document.querySelectorAll('.tabBtn').forEach(b=>{ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
-    const btn = document.querySelector('.tabBtn[data-tab="dashboard"]'); if(btn){ btn.classList.add('active'); btn.setAttribute('aria-pressed','true'); }
-    renderDashboard();
+  // navigate to profile (show profile page for user to edit after consenting)
+  document.querySelectorAll('.tab').forEach(s=>s.classList.add('hidden'));
+  const prof = document.getElementById('profile'); if(prof) prof.classList.remove('hidden');
+  document.querySelectorAll('.tabBtn').forEach(b=>{ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+  const btn = document.querySelector('.tabBtn[data-tab="profile"]'); if(btn){ btn.classList.add('active'); btn.setAttribute('aria-pressed','true'); }
+  // populate inputs
+  try{ initProfileInputs(); }catch(e){}
     // enable profile editing once consent accepted
     setProfileEnabled(true);
   // reveal profile block and hide consent box (if present)
-  try{ const profileBlock = document.getElementById('profileBlock'); const consentBoxEl = document.getElementById('consentBox'); if(profileBlock) profileBlock.classList.remove('hidden'); if(consentBoxEl) consentBoxEl.classList.add('hidden'); }catch(e){}
+    try{ const profileBlock = document.getElementById('profileBlock'); if(profileBlock) profileBlock.classList.remove('hidden'); // toggle buttons/status in both places
+      ['Profile','Global'].forEach(loc=>{ const btns = document.getElementById('consentButtons'+loc); const stat = document.getElementById('consentStatus'+loc); const cancel = document.getElementById('consentCancel'+loc); if(btns) btns.classList.add('hidden'); if(stat) stat.classList.remove('hidden'); if(cancel) cancel.classList.remove('hidden'); });
+    }catch(e){}
   }));
   declineButtons.forEach(id=> document.getElementById(id)?.addEventListener('click', ()=>{
     alert('การยืนยันจำเป็นต้องใช้งานแอปนี้ต่อ');
+  }));
+  // Revoke consent handlers (always available where shown)
+  const revokeIds = ['consentRevokeProfile','consentCancelProfile'];
+  revokeIds.forEach(id=> document.getElementById(id)?.addEventListener('click', ()=>{
+    if(!confirm('คุณต้องการถอนการยินยอมหรือไม่? การถอนจะล็อกโปรไฟล์และลบการตั้งค่าบางอย่างออกจากอุปกรณ์นี้')) return;
+    try{ LS.save('consent', false); }catch(e){}
+    // disable profile inputs and hide profile block
+    setProfileEnabled(false);
+    try{ const profileBlock = document.getElementById('profileBlock'); if(profileBlock) profileBlock.classList.add('hidden'); }catch(e){}
+    // show the global confirm tab so user must re-confirm to use app
+    document.querySelectorAll('.tab').forEach(s=>s.classList.add('hidden'));
+    const conf = document.getElementById('confirm'); if(conf) conf.classList.remove('hidden');
+    document.querySelectorAll('.tabBtn').forEach(b=>{ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+    const btn = document.querySelector('.tabBtn[data-tab="confirm"]'); if(btn){ btn.classList.add('active'); btn.setAttribute('aria-pressed','true'); }
+    // toggle buttons/status UI
+    ['Profile','Global'].forEach(loc=>{ const btns = document.getElementById('consentButtons'+loc); const stat = document.getElementById('consentStatus'+loc); const revoke = document.getElementById('consentRevoke'+loc); if(btns) btns.classList.remove('hidden'); if(stat) stat.classList.add('hidden'); if(revoke) revoke.classList.add('hidden'); });
+    showToast('ถอนการยินยอมแล้ว');
   }));
   // sample data generation button (in cal30Block)
   document.getElementById('genSampleData')?.addEventListener('click', async ()=>{

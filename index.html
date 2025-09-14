@@ -4,12 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Kidney CKD Kids – Food Guidance</title>
-  <link rel="manifest" href="/taiyim/manifest.json">
+  <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#0f172a">
   <!-- iOS PWA support -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="/images/icon-192.png">
+  <link rel="apple-touch-icon" href="./images/icon-192.png">
   <!-- Tailwind via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -155,10 +155,11 @@
           <p>ข้อมูลส่วนบุคคล (เช่น โปรไฟล์ผู้ป่วย) จะถูกเก็บไว้เฉพาะในอุปกรณ์นี้ หากคุณต้องการลบข้อมูล ให้ใช้ปุ่มรีเซ็ตข้อมูลทั้งหมด.</p>
           <p>การเพิ่มรายการอาหารใหม่ในหน้าจอ 'จัดการ' จะเป็นเพียงการบันทึกเฉพาะเครื่องนี้ เว้นแต่จะส่งไปยังเซิร์ฟเวอร์และได้รับการยืนยัน.</p>
         </div>
-          <div class="flex justify-end gap-2">
-          <button id="consentDeclineGlobal" class="px-3 py-2 rounded-md border">ยกเลิก</button>
-          <button id="consentAcceptGlobal" class="px-4 py-2 rounded-md bg-violet-600 hover:bg-violet-700 text-white">ยืนยันและต่อไป</button>
-        </div>
+      <div id="consentButtonsGlobal" class="flex justify-end gap-2">
+      <button id="consentDeclineGlobal" class="px-3 py-2 rounded-md border">ยกเลิก</button>
+      <button id="consentAcceptGlobal" class="px-4 py-2 rounded-md bg-violet-600 hover:bg-violet-700 text-white">ยืนยันและต่อไป</button>
+          </div>
+      <div id="consentStatusGlobal" class="hidden mt-2 text-sm text-green-600 font-medium">ยืนยันแล้ว</div>
       </div>
     </section>
 
@@ -209,9 +210,16 @@
         <div id="consentBox" class="mb-4 bg-white border rounded p-3">
           <div class="font-medium mb-1">อ่านและยืนยัน</div>
           <div class="text-sm text-slate-700 mb-3">โปรดอ่านข้อความและยืนยันว่าคุณเข้าใจว่าแอปนี้เป็นเพียงต้นแบบเพื่อการศึกษา และไม่ใช่คำแนะนำทางการแพทย์ที่แท้จริง. ข้อมูลส่วนบุคคลจะถูกเก็บไว้เฉพาะในอุปกรณ์นี้.</div>
-          <div class="flex justify-end gap-2">
-            <button id="consentDecline" class="px-3 py-1 rounded-md border">ยกเลิก</button>
-            <button id="consentAccept" class="px-4 py-1 rounded-md bg-violet-600 hover:bg-violet-700 text-white">ยืนยันและต่อไป</button>
+          <div class="flex justify-between items-center">
+            <div id="consentButtonsProfile" class="flex justify-end gap-2">
+              <button id="consentDecline" class="px-3 py-1 rounded-md border">ยกเลิก</button>
+              <button id="consentAccept" class="px-4 py-1 rounded-md bg-violet-600 hover:bg-violet-700 text-white">ยืนยันและต่อไป</button>
+            </div>
+            <button id="consentRevokeProfile" class="ml-2 px-3 py-1 text-sm text-red-600 border rounded hidden">ถอนการยินยอม</button>
+          </div>
+          <div id="consentStatusProfile" class="hidden mt-2 text-sm text-green-600 font-medium">
+            <span>ยืนยันแล้ว</span>
+            <button id="consentCancelProfile" class="ml-3 px-2 py-1 text-sm text-red-600 border rounded hidden">ยกเลิกการยืนยัน</button>
           </div>
         </div>
         <!-- profile block: hidden until consent accepted -->
