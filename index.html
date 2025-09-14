@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kidney CKD Kids – Food Guidance</title>
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* simple progress bar */
+    .bar { height: 12px; border-radius: 999px; background: #e5e7eb; overflow: hidden; }
+    .bar>span { display:block; height:100%; background: #60a5fa; }
+    .chip { font-size:12px; padding:2px 8px; border-radius:999px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <header class="p-4 bg-white shadow-sm sticky top-0 z-10">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <h1 class="text-lg font-semibold">🍎 CKD Kids – โภชนาการโรคไต</h1>
+      <nav class="flex gap-2 text-sm">
+        <button class="tabBtn px-3 py-1 rounded hover:bg-slate-100" data-tab="dashboard">Dashboard</button>
+        <button class="tabBtn px-3 py-1 rounded hover:bg-slate-100" data-tab="food">เลือกอาหาร</button>
+        <button class="tabBtn px-3 py-1 rounded hover:bg-slate-100" data-tab="manage">จัดการอาหาร</button>
+        <button class="tabBtn px-3 py-1 rounded hover:bg-slate-100" data-tab="profile">โปรไฟล์</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto p-4 grid gap-6">
+    <!-- Dashboard -->
+    <section id="dashboard" class="tab">
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="bg-white shadow rounded-xl p-4">
+          <h2 class="font-semibold mb-2">ภาพรวมวันนี้</h2>
+          <div class="text-sm text-slate-600 mb-3" id="userSummary">โปรไฟล์ยังไม่ครบ กรุณากรอกในแท็บโปรไฟล์</div>
+          <div class="space-y-3">
+            <div>
+              <div class="flex justify-between text-sm mb-1"><span>โปรตีน (g)</span><span id="proteinLabel">0 / 0</span></div>
+              <div class="bar"><span id="proteinBar" style="width:0%"></span></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-1"><span>โซเดียม (mg)</span><span id="sodiumLabel">0 / 0</span></div>
+              <div class="bar"><span id="sodiumBar" style="width:0%"></span></div>
+            </div>
+            <div class="text-sm" id="adviceBox"></div>
+          </div>
+        </div>
+        <div class="bg-white shadow rounded-xl p-4">
+          <h2 class="font-semibold mb-2">ประวัติอาหารวันนี้</h2>
+          <div id="todayList" class="divide-y"></div>
+          <div class="flex justify-between items-center pt-3">
+            <button id="clearToday" class="text-xs text-red-600 hover:underline">ลบรายการวันนี้</button>
+            <button id="exportCsv" class="text-xs text-slate-700 hover:underline">ส่งออก CSV</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Food Search/Add -->
+    <section id="food" class="tab hidden">
+      <div class="bg-white shadow rounded-xl p-4">
+        <h2 class="font-semibold mb-4">เลือก/เพิ่มอาหารในมื้อวันนี้</h2>
+        <div class="grid md:grid-cols-4 gap-2 mb-3">
+          <input id="search" class="md:col-span-3 border rounded px-3 py-2" placeholder="ค้นหาอาหาร (ชื่อ)" />
+          <select id="categoryFilter" class="border rounded px-3 py-2">
+            <option value="">ทุกหมวด</option>
+            <option>อาหารจานหลัก</option>
+            <option>อาหารว่าง</option>
+            <option>ซอสปรุงรส</option>
+            <option>อื่นๆ</option>
+          </select>
+        </div>
+        <div id="foodList" class="grid sm:grid-cols-2 gap-3"></div>
+      </div>
+    </section>
+
+    <!-- Manage Foods -->
+    <section id="manage" class="tab hidden">
+      <div class="bg-white shadow rounded-xl p-4">
+        <h2 class="font-semibold mb-3">เพิ่มรายการอาหารของคุณ</h2>
+        <form id="addFoodForm" class="grid md:grid-cols-5 gap-2 items-end">
+          <input required id="foodName" class="border rounded px-3 py-2 md:col-span-2" placeholder="ชื่ออาหาร" />
+          <select id="foodCat" class="border rounded px-3 py-2">
+            <option>อาหารจานหลัก</option>
+            <option>อาหารว่าง</option>
+            <option>ซอสปรุงรส</option>
+            <option>อื่นๆ</option>
+          </select>
+          <input required id="foodProtein" type="number" min="0" step="0.1" class="border rounded px-3 py-2" placeholder="โปรตีน/หน่วย (g)" />
+          <input required id="foodSodium" type="number" min="0" step="1" class="border rounded px-3 py-2" placeholder="โซเดียม/หน่วย (mg)" />
+          <button class="bg-slate-800 text-white rounded px-4 py-2">เพิ่ม</button>
+        </form>
+        <p class="text-xs text-slate-500 mt-2">* หน่วยบริโภค = 1 เสิร์ฟ ตามที่คุณกำหนด</p>
+      </div>
+    </section>
+
+    <!-- Profile -->
+    <section id="profile" class="tab hidden">
+      <div class="bg-white shadow rounded-xl p-4">
+        <h2 class="font-semibold mb-3">โปรไฟล์ผู้ป่วย</h2>
+        <form id="profileForm" class="grid sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm">ชื่อ</label>
+            <input id="p_name" class="border rounded w-full px-3 py-2" />
+          </div>
+          <div>
+            <label class="text-sm">อายุ (ปี)</label>
+            <input id="p_age" type="number" min="0" max="18" class="border rounded w-full px-3 py-2" />
+          </div>
+          <div>
+            <label class="text-sm">น้ำหนัก (กก.)</label>
+            <input id="p_weight" type="number" min="1" step="0.1" class="border rounded w-full px-3 py-2" />
+          </div>
+          <div>
+            <label class="text-sm">ระยะ CKD</label>
+            <select id="p_ckd" class="border rounded w-full px-3 py-2">
+              <option value="2">ระยะ 2</option>
+              <option value="3">ระยะ 3</option>
+              <option value="4">ระยะ 4</option>
+              <option value="5">ระยะ 5 / ฟอกไต (5D)</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2 flex gap-2">
+            <button class="bg-slate-800 text-white rounded px-4 py-2" type="submit">บันทึกโปรไฟล์</button>
+            <button id="resetAll" class="border rounded px-4 py-2" type="button">รีเซ็ตข้อมูลทั้งหมด</button>
+          </div>
+        </form>
+        <div class="mt-4 text-xs text-slate-500">หมายเหตุ: เป้าหมายรายวันอ้างอิงช่วงค่าโปรตีน (กรัม/กก./วัน) และโซเดียม (มก./วัน) ตามแนวทาง AAP และ Thai DRI แบบย่อ</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="max-w-4xl mx-auto p-6 text-xs text-slate-500">
+    เครื่องมือนี้เป็นต้นแบบเพื่อการศึกษา ไม่ใช่เครื่องมือการแพทย์จริง ควรปรึกษาแพทย์/นักกำหนดอาหารเสมอ
+  </footer>
+
+  <script>
+    // --- Data & Storage Helpers ---
+    const LS = {
+      load: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+      save: (k, v) => localStorage.setItem(k, JSON.stringify(v))
+    };
+    const todayKey = () => 'log_'+new Date().toISOString().slice(0,10);
+
+    // Sample food database (Thai‑friendly)
+    const defaultFoods = [
+      { id: 'rice', name: 'ข้าวสวย 1 ทัพพี', cat: 'อาหารจานหลัก', protein: 2.0, sodium: 2 },
+      { id: 'chicken_boil', name: 'ไก่ต้ม 50 กรัม', cat: 'อาหารจานหลัก', protein: 11.0, sodium: 50 },
+      { id: 'egg', name: 'ไข่ต้ม 1 ฟอง', cat: 'อาหารจานหลัก', protein: 6.0, sodium: 65 },
+      { id: 'tofu', name: 'เต้าหู้ขาว 80 กรัม', cat: 'อาหารจานหลัก', protein: 8.0, sodium: 10 },
+      { id: 'fish', name: 'ปลาอบ 60 กรัม', cat: 'อาหารจานหลัก', protein: 12.0, sodium: 70 },
+      { id: 'soy_sauce', name: 'ซีอิ๊ว 1 ช้อนชา', cat: 'ซอสปรุงรส', protein: 0.5, sodium: 335 },
+      { id: 'instant_noodle', name: 'บะหมี่กึ่งฯ 1 ซอง (พร้อมซุป)', cat: 'อาหารจานหลัก', protein: 7.0, sodium: 1500 },
+      { id: 'banana', name: 'กล้วยน้ำว้า 1 ลูก', cat: 'อาหารว่าง', protein: 1.2, sodium: 1 },
+      { id: 'apple', name: 'แอปเปิล 1 ผลเล็ก', cat: 'อาหารว่าง', protein: 0.3, sodium: 1 },
+      { id: 'snack', name: 'ขนมอบกรอบ 1 ซองเล็ก', cat: 'อาหารว่าง', protein: 2.0, sodium: 250 },
+    ];
+
+    const foods = LS.load('foods', defaultFoods);
+    if (!LS.load('foods_inited', false)) { LS.save('foods', foods); LS.save('foods_inited', true); }
+
+    const state = {
+      profile: LS.load('profile', { name: '', age: null, weight: null, ckd: '2' }),
+      log: LS.load(todayKey(), [])
+    };
+
+    function saveLog() { LS.save(todayKey(), state.log); }
+
+    // --- Nutrition Target Rules (simplified from AAP/Thai DRI ranges by age group) ---
+    function proteinRangePerKg(age){
+      // returns [min,max] g/kg/day
+      if (age <= 0.9) return [1.1, 1.57]; // 6-11 mo
+      if (age <= 1.1) return [0.9, 1.21]; // ~12 mo
+      if (age <= 3) return [0.9, 1.21];  // 2-3 yr
+      if (age <= 6) return [0.85, 1.03]; // 4-6 yr
+      if (age <= 12) return [0.9, 1.09]; // 7-12 yr
+      if (age <= 14) return [0.8, 1.07]; // 13-14 yr
+      return [0.8, 1.02];                // 15-17 yr
+    }
+
+    function sodiumRange(age){
+      // returns [min,max] mg/day (Thai DRI based bands)
+      if (age < 1) return [175, 550];
+      if (age <= 3) return [225, 675];
+      if (age <= 5) return [300, 900];
+      if (age <= 8) return [325, 950];
+      if (age <= 12) return [400, 1175];
+      if (age <= 15) return [500, 1500];
+      return [525, 1600];
+    }
+
+    function targets(){
+      const age = Number(state.profile.age || 0);
+      const wt = Number(state.profile.weight || 0);
+      const [pMinKG, pMaxKG] = proteinRangePerKg(age);
+      const pMin = wt * pMinKG;
+      const pMax = wt * pMaxKG;
+      const [sMin, sMax] = sodiumRange(age);
+      return { pMin, pMax, sMin, sMax };
+    }
+
+    // --- UI Helpers ---
+    function fmt(n, d=0){ return (n??0).toLocaleString(undefined,{maximumFractionDigits:d, minimumFractionDigits:d}); }
+    function percent(v, max){ if (!max) return 0; return Math.min(100, Math.round((v/max)*100)); }
+
+    function renderDashboard(){
+      const t = targets();
+      const sums = state.log.reduce((a,r)=>({ protein:a.protein+ r.protein*r.qty, sodium:a.sodium+ r.sodium*r.qty }), {protein:0,sodium:0});
+      // Labels & bars
+      document.getElementById('proteinLabel').textContent = `${fmt(sums.protein,1)} / ${fmt(t.pMax,1)} g`;
+      document.getElementById('sodiumLabel').textContent  = `${fmt(sums.sodium,0)} / ${fmt(t.sMax,0)} mg`;
+      document.getElementById('proteinBar').style.width = percent(sums.protein, t.pMax)+"%";
+      document.getElementById('sodiumBar').style.width  = percent(sums.sodium, t.sMax)+"%";
+
+      // Advice
+      const tips = [];
+      if (sums.sodium > 0.8*t.sMax) tips.push('⚠️ โซเดียมใกล้เกิน ลองลดซอส/บะหมี่กึ่งฯ เลือกปลาอบ/เต้าหู้แทน');
+      if (sums.protein < t.pMin*0.6) tips.push('ℹ️ โปรตีนน้อยไป อาจเพิ่มไข่ต้ม/ไก่ต้มในปริมาณเหมาะสม');
+      document.getElementById('adviceBox').textContent = tips.join(' · ');
+
+      // Summary line
+      const us = state.profile;
+      const line = (us.name?`ชื่อ: ${us.name} · `:'')+`อายุ ${us.age??'-'} ปี · น้ำหนัก ${us.weight??'-'} กก. · ระยะ CKD ${us.ckd}`+
+        ` | เป้าหมาย/วัน: โปรตีน ${fmt(t.pMin,1)}–${fmt(t.pMax,1)} g · โซเดียม ${fmt(t.sMin)}–${fmt(t.sMax)} mg`;
+      document.getElementById('userSummary').textContent = line;
+
+      // Today list
+      const container = document.getElementById('todayList');
+      container.innerHTML = '';
+      state.log.forEach((r, idx)=>{
+        const totP = r.protein*r.qty, totS = r.sodium*r.qty;
+        const proteinClass = totP<=t.pMax? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+        const sodiumClass  = totS<=t.sMax?  'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+        const row = document.createElement('div');
+        row.className = 'py-2 flex items-center justify-between gap-2';
+        row.innerHTML = `
+          <div>
+            <div class="font-medium">${r.name} <span class="text-xs text-slate-500">×${r.qty}</span></div>
+            <div class="flex gap-2 mt-1">
+              <span class="chip ${proteinClass}">โปรตีน ${fmt(totP,1)} g</span>
+              <span class="chip ${sodiumClass}">โซเดียม ${fmt(totS)} mg</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="text-sm px-2 py-1 border rounded" data-act="minus" data-idx="${idx}">−</button>
+            <button class="text-sm px-2 py-1 border rounded" data-act="plus" data-idx="${idx}">+</button>
+            <button class="text-sm px-2 py-1 border rounded text-red-600" data-act="del" data-idx="${idx}">ลบ</button>
+          </div>`;
+        container.appendChild(row);
+      });
+    }
+
+    // Food list rendering
+    function renderFoodList(){
+      const list = document.getElementById('foodList');
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      const cat = document.getElementById('categoryFilter').value;
+      list.innerHTML = '';
+      foods
+        .filter(f => (!q || f.name.toLowerCase().includes(q)) && (!cat || f.cat===cat))
+        .forEach(f => {
+          const card = document.createElement('div');
+          card.className = 'border rounded-lg p-3 hover:shadow-sm bg-white';
+          // Determine image srcs
+          const jpg = `images/${f.id}.jpg`;
+          const png = `images/${f.id}.png`;
+          const noImg = 'images/no-image.jpg';
+          card.innerHTML = `
+            <div class="flex gap-3 items-center sm:items-start">
+              <div class="flex-shrink-0">
+                <img src="${jpg}" alt="${f.name}" class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-md border" onerror="this.onerror=null;this.src='${png}';this.onerror=function(){this.src='${noImg}';}" />
+              </div>
+              <div class="flex-1">
+                <div class="font-medium text-sm">${f.name}</div>
+                <div class="text-xs text-slate-600 mt-1">หมวด: ${f.cat}</div>
+                <div class="text-sm mt-2">โปรตีน <b>${fmt(f.protein,1)}</b> g · โซเดียม <b>${fmt(f.sodium)}</b> mg / เสิร์ฟ</div>
+                <div class="mt-3 flex items-center gap-2">
+                  <input type="number" min="1" value="1" class="qty border rounded px-2 py-1 w-20" />
+                  <button class="add bg-slate-800 text-white rounded px-3 py-1" data-id="${f.id}">เพิ่ม</button>
+                </div>
+              </div>
+            </div>`;
+          list.appendChild(card);
+        });
+    }
+
+    // Events
+    document.querySelectorAll('.tabBtn').forEach(btn=>btn.addEventListener('click', ()=>{
+      const target = btn.dataset.tab;
+      document.querySelectorAll('.tab').forEach(s=>s.classList.add('hidden'));
+      document.getElementById(target).classList.remove('hidden');
+      if(target==='food') renderFoodList();
+      if(target==='dashboard') renderDashboard();
+    }));
+
+    document.getElementById('profileForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      state.profile = {
+        name: document.getElementById('p_name').value.trim(),
+        age: Number(document.getElementById('p_age').value),
+        weight: Number(document.getElementById('p_weight').value),
+        ckd: document.getElementById('p_ckd').value
+      };
+      LS.save('profile', state.profile);
+      renderDashboard();
+      alert('บันทึกโปรไฟล์แล้ว');
+    });
+
+    document.getElementById('resetAll').addEventListener('click', ()=>{
+      if(confirm('ลบข้อมูลทั้งหมด (โปรไฟล์ อาหาร ที่บันทึกวันนี้)?')){
+        localStorage.clear();
+        location.reload();
+      }
+    });
+
+    document.getElementById('food').addEventListener('click', (e)=>{
+      if(e.target.classList.contains('add')){
+        const id = e.target.dataset.id;
+        const card = e.target.closest('div');
+        const qty = Number(card.querySelector('.qty').value || 1);
+        const item = foods.find(f=>f.id===id);
+        state.log.push({ name: item.name, protein: item.protein, sodium: item.sodium, qty });
+        saveLog();
+        renderDashboard();
+        alert('เพิ่มในมื้อวันนี้แล้ว');
+      }
+    });
+
+    document.getElementById('search').addEventListener('input', renderFoodList);
+    document.getElementById('categoryFilter').addEventListener('change', renderFoodList);
+
+    document.getElementById('todayList').addEventListener('click', (e)=>{
+      const idx = Number(e.target.dataset.idx);
+      const act = e.target.dataset.act;
+      if(act==='del'){ state.log.splice(idx,1); }
+      if(act==='plus'){ state.log[idx].qty++; }
+      if(act==='minus'){ state.log[idx].qty = Math.max(1, state.log[idx].qty-1); }
+      saveLog();
+      renderDashboard();
+    });
+
+    document.getElementById('clearToday').addEventListener('click', ()=>{
+      if(confirm('ลบรายการอาหารของวันนี้ทั้งหมด?')){ state.log = []; saveLog(); renderDashboard(); }
+    });
+
+    document.getElementById('exportCsv').addEventListener('click', ()=>{
+      const rows = [['วันที่','ชื่ออาหาร','จำนวน','โปรตีนต่อเสิร์ฟ (g)','โซเดียมต่อเสิร์ฟ (mg)','โปรตีนรวม (g)','โซเดียมรวม (mg)']];
+      const d = new Date().toISOString().slice(0,10);
+      state.log.forEach(r=> rows.push([d, r.name, r.qty, r.protein, r.sodium, (r.protein*r.qty).toFixed(1), (r.sodium*r.qty)]));
+      const csv = rows.map(r=>r.join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `ckd_kids_${d}.csv`;
+      a.click();
+    });
+
+    document.getElementById('addFoodForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const f = {
+        id: 'u_'+Date.now(),
+        name: document.getElementById('foodName').value.trim(),
+        cat: document.getElementById('foodCat').value,
+        protein: Number(document.getElementById('foodProtein').value),
+        sodium: Number(document.getElementById('foodSodium').value)
+      };
+      foods.push(f);
+      LS.save('foods', foods);
+      e.target.reset();
+      alert('เพิ่มอาหารแล้ว');
+      renderFoodList();
+    });
+
+    // Init populate profile inputs
+    (function init(){
+      const p = state.profile;
+      document.getElementById('p_name').value = p.name || '';
+      document.getElementById('p_age').value = p.age ?? '';
+      document.getElementById('p_weight').value = p.weight ?? '';
+      document.getElementById('p_ckd').value = p.ckd || '2';
+      renderDashboard();
+      renderFoodList();
+    })();
+  </script>
+</body>
+</html>
