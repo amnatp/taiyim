@@ -344,8 +344,10 @@ function registerEvents(){
     const rows = [['วันที่','ชื่ออาหาร','จำนวน','โปรตีนต่อเสิร์ฟ (g)','โซเดียมต่อเสิร์ฟ (mg)','โปรตีนรวม (g)','โซเดียมรวม (mg)']];
     const d = new Date().toISOString().slice(0,10);
     state.log.forEach(r=> rows.push([d, r.name, r.qty, r.protein, r.sodium, (r.protein*r.qty).toFixed(1), (r.sodium*r.qty)]));
-    const csv = rows.map(r=>r.join(',')).join('\n');
-    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const csv = rows.map(r=>r.join(',')).join('\n');
+  // prepend UTF-8 BOM so apps like Excel / Numbers on iOS detect UTF-8 (Thai) correctly
+  const csvWithBom = '\uFEFF' + csv;
+  const blob = new Blob([csvWithBom], {type:'text/csv;charset=utf-8;'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `ckd_kids_${d}.csv`;
@@ -633,8 +635,10 @@ export async function boot(){
         }
       }
       // build CSV
-      const csv = rows.map(r=> r.map(c=> '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const csv = rows.map(r=> r.map(c=> '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  // prepend UTF-8 BOM so iOS apps interpret CSV as UTF-8 correctly (fixes Thai charset issues)
+  const csvWithBom = '\uFEFF' + csv;
+  const blob = new Blob([csvWithBom], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
       a.download = `ckd_kids_history_${new Date().toISOString().slice(0,10)}.csv`;
       a.click();
