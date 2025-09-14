@@ -29,7 +29,7 @@ function toggleAgeForms(age){
 
 function registerEvents(){
   // Helper to reliably show a tab, update nav visuals, and run renderer
-  function showTab(tabId){
+  async function showTab(tabId){
     try{
       // hide all tab sections
       document.querySelectorAll('.tab').forEach(s=>s.classList.add('hidden'));
@@ -61,7 +61,11 @@ function registerEvents(){
         }catch(e){ console.warn('history render scheduling failed', e); }
       }catch(e){ console.warn('showTab dashboard render failed', e); }
       if(tabId==='food') try{ renderFoodList(); }catch(e){}
-      if(tabId==='manage') try{ renderManageFoods(); }catch(e){}
+      if(tabId==='manage') try{ 
+        // ensure server-provided foods are loaded before rendering manage list (demo convenience)
+        try{ await loadFoodsFromServer(); }catch(e){}
+        try{ renderManageFoods(); }catch(e){}
+      }catch(e){}
       return true;
     }catch(e){ console.warn('showTab error', e); return false; }
   }
