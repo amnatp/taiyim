@@ -19,6 +19,17 @@ function initProfileInputs(){
   toggleAgeForms(Number(document.getElementById('p_age').value||0));
 }
 
+function setProfileEnabled(enabled){
+  const form = document.getElementById('profileForm');
+  if(!form) return;
+  Array.from(form.querySelectorAll('input,select,button')).forEach(el=>{
+    // keep the reset button enabled
+    if(el.id === 'resetAll') { el.disabled = false; return; }
+    el.disabled = !enabled;
+    if(!enabled) el.classList && el.classList.add('opacity-60'); else el.classList && el.classList.remove('opacity-60');
+  });
+}
+
 function toggleAgeForms(age){
   const ped = document.getElementById('pediatricForm');
   const adult = document.getElementById('adultForm');
@@ -383,24 +394,7 @@ function registerServiceWorker(){
   }
 }
 
-// PWA install prompt handling
-let deferredPrompt = null;
-function setupInstallPrompt(){
-  const btn = document.getElementById('installBtn');
-  window.addEventListener('beforeinstallprompt', (e)=>{
-    e.preventDefault();
-    deferredPrompt = e;
-    if(btn) btn.classList.remove('hidden');
-  });
-  if(btn) btn.addEventListener('click', async ()=>{
-    if(!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-    console.log('PWA install choice', choice.outcome);
-    deferredPrompt = null;
-    btn.classList.add('hidden');
-  });
-}
+// PWA install prompt handling removed (install UI not included in demo)
 
 function setupIOSHint(){
   const hint = document.getElementById('iosInstallHint');
@@ -455,7 +449,6 @@ export async function boot(){
   renderFoodList();
   renderManageFoods();
   registerServiceWorker();
-  setupInstallPrompt();
   setupIOSHint();
 
   // DEV: allow regeneration of sample data via ?regen=1 (creates 40 days × 3 meals)
@@ -483,7 +476,22 @@ export async function boot(){
     const btn = document.querySelector('.tabBtn[data-tab="confirm"]'); if(btn){ btn.classList.add('active'); btn.setAttribute('aria-pressed','true'); }
   }
 
-  document.getElementById('consentAccept')?.addEventListener('click', ()=>{
+  // ensure profile inputs are disabled until consent is accepted
+  setProfileEnabled(!!consent);
+  // within Profile tab, show/hide the profile block based on consent
+  try{
+    const profileBlock = document.getElementById('profileBlock');
+    const consentBoxEl = document.getElementById('consentBox');
+    if(profileBlock && consentBoxEl){
+      if(!!consent){ profileBlock.classList.remove('hidden'); consentBoxEl.classList.add('hidden'); }
+      else { profileBlock.classList.add('hidden'); consentBoxEl.classList.remove('hidden'); }
+    }
+  }catch(e){ /* ignore */ }
+
+  // unify consent accept/decline across any consent buttons (profile/global)
+  const acceptButtons = ['consentAccept','consentAcceptGlobal'];
+  const declineButtons = ['consentDecline','consentDeclineGlobal'];
+  acceptButtons.forEach(id=> document.getElementById(id)?.addEventListener('click', ()=>{
     LS.save('consent', true);
     // navigate to dashboard
     document.querySelectorAll('.tab').forEach(s=>s.classList.add('hidden'));
@@ -491,11 +499,14 @@ export async function boot(){
     document.querySelectorAll('.tabBtn').forEach(b=>{ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
     const btn = document.querySelector('.tabBtn[data-tab="dashboard"]'); if(btn){ btn.classList.add('active'); btn.setAttribute('aria-pressed','true'); }
     renderDashboard();
-  });
-
-  document.getElementById('consentDecline')?.addEventListener('click', ()=>{
+    // enable profile editing once consent accepted
+    setProfileEnabled(true);
+  // reveal profile block and hide consent box (if present)
+  try{ const profileBlock = document.getElementById('profileBlock'); const consentBoxEl = document.getElementById('consentBox'); if(profileBlock) profileBlock.classList.remove('hidden'); if(consentBoxEl) consentBoxEl.classList.add('hidden'); }catch(e){}
+  }));
+  declineButtons.forEach(id=> document.getElementById(id)?.addEventListener('click', ()=>{
     alert('การยืนยันจำเป็นต้องใช้งานแอปนี้ต่อ');
-  });
+  }));
   // sample data generation button (in cal30Block)
   document.getElementById('genSampleData')?.addEventListener('click', async ()=>{
     await generateDummyHistory(40,3);
