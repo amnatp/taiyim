@@ -208,16 +208,12 @@ function registerEvents(){
   closeConfirm();
   renderFoodList();
   });
-  document.getElementById('confirmAddDashboard').addEventListener('click', ()=>{
-  // user chose to go to dashboard — close modal and navigate
+  document.getElementById('confirmAddDashboard').addEventListener('click', async ()=>{
+  // user chose to go to dashboard — close modal and navigate using showTab so renderers run
   closeConfirm();
-    // navigate to dashboard tab
-    document.querySelectorAll('.tab').forEach(s=>s.classList.add('hidden'));
-    const db = document.getElementById('dashboard'); if(db) db.classList.remove('hidden');
-    // update tab button active visuals
-  document.querySelectorAll('.tabBtn').forEach(b=>{ b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
-  const btn = document.querySelector('.tabBtn[data-tab="dashboard"]'); if(btn){ btn.classList.add('active'); btn.setAttribute('aria-pressed','true'); }
-    renderDashboard();
+  try{ await showTab('dashboard'); }catch(e){ // fallback
+    try{ document.querySelectorAll('.tab').forEach(s=>s.classList.add('hidden')); const db = document.getElementById('dashboard'); if(db) db.classList.remove('hidden'); renderDashboard(); }catch(err){}
+  }
   });
 
   document.getElementById('search').addEventListener('input', renderFoodList);
