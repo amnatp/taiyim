@@ -1,9 +1,17 @@
-const CACHE = 'ckd-kids-v1';
+// Bump this string to force cache updates when assets change
+const CACHE = 'ckd-kids-v2';
 const ASSETS = [
   '.',
   'index.html',
   'manifest.json',
-  'images/no-image.svg'
+  '/js/app.js',
+  '/js/ui.js',
+  '/js/data.js',
+  '/images/icon-192.png',
+  '/images/icon-512.png',
+  '/images/no-image.svg',
+  '/images/no-image.jpg',
+  '/images/rice.jpg'
 ];
 
 self.addEventListener('install', (e) => {
@@ -12,17 +20,29 @@ self.addEventListener('install', (e) => {
 });
 
 self.addEventListener('activate', (e) => {
-  e.waitUntil(self.clients.claim());
+  // Remove old caches
+  e.waitUntil(
+    caches.keys().then(names => Promise.all(
+      names.map(n => { if (n !== CACHE) return caches.delete(n); return null; })
+    )).then(() => self.clients.claim())
+  );
 });
 
 // Simple cache-first for known assets, network fallback otherwise
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (url.origin === location.origin) {
-  e.respondWith(caches.match(e.request).then(resp => resp || fetch(e.request).then(r => {
-      // put copy into cache for future
-      if (e.request.method === 'GET') caches.open(CACHE).then(c => c.put(e.request, r.clone()));
-      return r;
-  }).catch(()=> caches.match('images/no-image.svg'))));
+    e.respondWith(
+      caches.match(e.request).then(resp => {
+        if (resp) return resp;
+        return fetch(e.request).then(r => {
+          // put copy into cache for future
+          if (e.request.method === 'GET' && r && r.status === 200) {
+            caches.open(CACHE).then(c => c.put(e.request, r.clone()));
+          }
+          return r;
+        }).catch(()=> caches.match('/images/no-image.svg'));
+      })
+    );
   }
 });
